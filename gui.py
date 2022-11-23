@@ -2,11 +2,16 @@ import pymongo
 from tkinter import *
 from tkinter import messagebox
 from datetime import datetime
+import seaborn as sns
+import pandas as pd
+import matplotlib.pyplot as plt
 
 myclient = pymongo.MongoClient(
     'mongodb+srv://ter:ter@cluster0.zmoirlm.mongodb.net/?retryWrites=true&w=majority')
 db = myclient['Store']
 mycol = db['Product']
+
+
 
 # function
 
@@ -39,7 +44,7 @@ def save():
         id = newid+1
         price = fruitprice(create_pd)
         mydict = {'tranid': id, 'day': int(datetime.now().strftime('%d')), 'month': int(datetime.now().strftime('%m')), 'year': int(datetime.now().strftime('%Y')), 'hour': int(datetime.now().strftime('%H')), 'product': create_pd.get(
-        ), 'quality': int(create_qty.get()), 'price': price, 'Amount': int(create_qty.get())*price}
+        ), 'quality': int(create_qty.get()), 'price': price, 'sale': int(create_qty.get())*price}
         x = mycol.insert_one(mydict)
 
 
@@ -96,10 +101,70 @@ def cal():
     amt.insert(0, x)
     amt.configure(state=DISABLED)
 
+def new_win():
+    top = Toplevel()
+    top.title("toplevel")
+    top.geometry("200x100")
+    
+    label = Label(top, text='Click the button to display the graph')
+    label.pack()
 
-def plot():
-    pass
+    btn = Button(top, text='Fruit Sale', command=fruittotalbar)
+    btn.pack()
+    btn = Button(top, text='Fruit Sale Month', command=fruitmonthline)
+    btn.pack()
+    btn = Button(top, text='Fruit Sale Hour', command=fruithourline)
+    btn.pack()
 
+    top.mainloop()
+
+def fruittotalbar():
+    ls_pd = []
+    ls_sale = []
+    for doc in mycol.find():
+       prod = doc['product']
+       sale = doc['sale']
+       ls_pd.append(prod)
+       ls_sale.append(sale)
+    df = pd.DataFrame(list(zip(ls_pd, ls_sale)), columns =['Product', 'Sale'])
+    df = df.groupby('Product').sum()
+    plt.title('Total Revenue by Product')
+    g = sns.barplot(data=df, x=df.index, y='Sale', errorbar=None)
+    plt.show()
+
+def fruithourline():
+    ls_pd = []
+    ls_sale = []
+    ls_hour = []
+    for doc in mycol.find():
+        prod = doc['product']
+        sale = doc['sale']
+        hour = doc['hour']
+        ls_pd.append(prod)
+        ls_sale.append(sale)
+        ls_hour.append(hour)
+    df = pd.DataFrame(list(zip(ls_pd, ls_sale, ls_hour)), columns =['Product', 'Sale', 'Hour'])
+    df = df.groupby(['Product', 'Hour']).sum().reset_index()
+    plt.title('Hourly Sales Trend')
+    g = sns.lineplot(df, x='Hour', y='Sale', hue='Product')
+    plt.show()
+
+def fruitmonthline():
+    ls_pd = []
+    ls_sale = []
+    ls_month = []
+    for doc in mycol.find():
+        prod = doc['product']
+        sale = doc['sale']
+        month = doc['month']
+        ls_pd.append(prod)
+        ls_sale.append(sale)
+        ls_month.append(month)
+    df = pd.DataFrame(list(zip(ls_pd, ls_sale, ls_month)), columns =['Product', 'Sale', 'Month'])
+    df = df.groupby(['Product', 'Month']).sum().reset_index()
+    plt.title('Monthly Sales Trend')
+    g = sns.lineplot(df, x='Month', y='Sale', hue='Product')
+    plt.show()
 
 ######################################
 fields = ['tranid', 'day', 'month', 'year', 'hour', 'product']
@@ -226,14 +291,17 @@ btn.grid(row=15, column=1)
 
 # Delete
 btn = Button(app, text='Delete', command=delete)
-btn.grid(column=1, row=19)
+btn.grid(row=19, column=1)
 
 btn = Button(app, text='Delete All', command=delete_all)
-btn.grid(column=2, row=19)
+btn.grid(row=19, column=2)
 
 # Plot
-btn = Button(app, text='Plot', command=plot)
-btn.grid(column=7, row=20)
+label = Label(app, text='')
+label.grid(row=20, column=1)
+
+btn = Button(app, text='Plot', command=new_win)
+btn.grid(row=21, column=1)
 
 
 app.mainloop()
