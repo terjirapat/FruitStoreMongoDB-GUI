@@ -12,7 +12,6 @@ db = myclient['Store']
 mycol = db['Product']
 
 
-
 # function
 
 
@@ -101,11 +100,12 @@ def cal():
     amt.insert(0, x)
     amt.configure(state=DISABLED)
 
+
 def new_win():
     top = Toplevel()
     top.title("toplevel")
     top.geometry("200x100")
-    
+
     label = Label(top, text='Click the button to display the graph')
     label.pack()
 
@@ -118,19 +118,21 @@ def new_win():
 
     top.mainloop()
 
+
 def fruittotalbar():
     ls_pd = []
     ls_sale = []
     for doc in mycol.find():
-       prod = doc['product']
-       sale = doc['sale']
-       ls_pd.append(prod)
-       ls_sale.append(sale)
-    df = pd.DataFrame(list(zip(ls_pd, ls_sale)), columns =['Product', 'Sale'])
+        prod = doc['product']
+        sale = doc['sale']
+        ls_pd.append(prod)
+        ls_sale.append(sale)
+    df = pd.DataFrame(list(zip(ls_pd, ls_sale)), columns=['Product', 'Sale'])
     df = df.groupby('Product').sum()
     plt.title('Total Revenue by Product')
     g = sns.barplot(data=df, x=df.index, y='Sale', errorbar=None)
     plt.show()
+
 
 def fruithourline():
     ls_pd = []
@@ -143,11 +145,13 @@ def fruithourline():
         ls_pd.append(prod)
         ls_sale.append(sale)
         ls_hour.append(hour)
-    df = pd.DataFrame(list(zip(ls_pd, ls_sale, ls_hour)), columns =['Product', 'Sale', 'Hour'])
+    df = pd.DataFrame(list(zip(ls_pd, ls_sale, ls_hour)),
+                      columns=['Product', 'Sale', 'Hour'])
     df = df.groupby(['Product', 'Hour']).sum().reset_index()
     plt.title('Hourly Sales Trend')
     g = sns.lineplot(df, x='Hour', y='Sale', hue='Product')
     plt.show()
+
 
 def fruitmonthline():
     ls_pd = []
@@ -160,11 +164,13 @@ def fruitmonthline():
         ls_pd.append(prod)
         ls_sale.append(sale)
         ls_month.append(month)
-    df = pd.DataFrame(list(zip(ls_pd, ls_sale, ls_month)), columns =['Product', 'Sale', 'Month'])
+    df = pd.DataFrame(list(zip(ls_pd, ls_sale, ls_month)),
+                      columns=['Product', 'Sale', 'Month'])
     df = df.groupby(['Product', 'Month']).sum().reset_index()
     plt.title('Monthly Sales Trend')
     g = sns.lineplot(df, x='Month', y='Sale', hue='Product')
     plt.show()
+
 
 ######################################
 fields = ['tranid', 'day', 'month', 'year', 'hour', 'product']
