@@ -7,7 +7,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 myclient = pymongo.MongoClient(
-    'mongodb+srv://ter:ter@cluster0.zmoirlm.mongodb.net/?retryWrites=true&w=majority')
+    'mongodb+srv://ter:ter@cluster0.pq4xvaw.mongodb.net/?retryWrites=true&w=majority')
 db = myclient['Store']
 mycol = db['Product']
 
@@ -39,11 +39,11 @@ def save():
     if r == True:
         newid = mycol.count_documents({})
         if newid != 0:
-            newid = mycol.find_one(sort=[{'tranid', -1}])['tranid']
+            newid = mycol.find_one(sort=[{'_id', -1}])['_id']
         id = newid+1
         price = fruitprice(create_pd)
-        mydict = {'tranid': id, 'day': int(datetime.now().strftime('%d')), 'month': int(datetime.now().strftime('%m')), 'year': int(datetime.now().strftime('%Y')), 'hour': int(datetime.now().strftime('%H')), 'product': create_pd.get(
-        ), 'quality': int(create_qty.get()), 'price': price, 'sale': int(create_qty.get())*price}
+        mydict = {'_id': id, 'day': int(datetime.now().strftime('%d')), 'month': int(datetime.now().strftime('%m')), 'year': int(datetime.now().strftime('%Y')), 'hour': int(datetime.now().strftime('%H')), 'product': create_pd.get(
+        ), 'unit': int(create_unit.get()), 'price': price, 'sale': int(create_unit.get())*price}
         x = mycol.insert_one(mydict)
 
 
@@ -60,30 +60,77 @@ def read():
     elif search_pd.get() != '' and search_day.get() == '' and search_month.get() != '' and search_year.get() != '':
         myquery = {'product': search_pd.get(), 'month': int(
             search_month.get()), 'year': int(search_year.get())}
+    elif search_pd.get() != '' and search_day.get() == '' and search_month.get() == '' and search_year.get() == '':
+        myquery = {'product': search_pd.get()}
+
+    top = Tk()
+    top.geometry("800x600")
+
+    Lb1 = Listbox(top, height=200, width=200)
+    scrollbar = Scrollbar(top)
+    scrollbar.pack(side=RIGHT, fill=BOTH)
+    Lb1.config(yscrollcommand=scrollbar.set)
+    scrollbar.config(command=Lb1.yview)
+
     doc = mycol.find(myquery)
-    for x in doc:
-        print(x)
+    for i, x in enumerate(doc):
+        Lb1.insert(i, x)
+
+    Lb1.pack()
+    top.mainloop()
 
 
 def read_all():
-    for x in mycol.find():
-        print(x)
+    top = Tk()
+    top.geometry("800x600")
+
+    Lb1 = Listbox(top, height=200, width=200)
+    scrollbar = Scrollbar(top)
+    scrollbar.pack(side=RIGHT, fill=BOTH)
+    Lb1.config(yscrollcommand=scrollbar.set)
+    scrollbar.config(command=Lb1.yview)
+
+    doc = mycol.find()
+    for i, x in enumerate(doc):
+        Lb1.insert(i, x)
+
+    Lb1.pack()
+    top.mainloop()
 
 
 def update():
     r = msgbox('Update Record?', 'Record')
     price = fruitprice(update_pd)
     if r == True:
-        query = {'tranid': int(update_id.get())}
+        top = Tk()
+        top.geometry("800x100")
+        Lb1 = Listbox(top, height=200, width=200)
+
+        query = {'_id': int(update_id.get())}
+
+        doc = mycol.find(query)
+
         newvalue = {"$set": {'product': update_pd.get(
-        ), 'price': price, 'Amount': int(create_qty.get())*price}}
+        ), 'price': price, 'unit': int(update_unit.get()), 'sale': int(update_unit.get())*price}}
+
+        Lb1.insert(1, 'Old Value')
+        for x in doc:
+            Lb1.insert(2, x)
+
         mycol.update_one(query, newvalue)
+        
+        Lb1.insert(3, 'New Value')
+        doc = mycol.find(query)
+        for x in doc:
+            Lb1.insert(4, x)
+        Lb1.pack()
+        top.mainloop()
 
 
 def delete():
     r = msgbox('Delete Record?', 'Record')
     if r == True:
-        myquery = {"tranid": int(delete_id.get())}
+        myquery = {"_id": int(delete_id.get())}
         mycol.delete_one(myquery)
 
 
@@ -94,12 +141,11 @@ def delete_all():
 
 
 def cal():
-    x = int(create_qty.get())*fruitprice(create_pd)
+    x = int(create_unit.get())*fruitprice(create_pd)
     amt = Entry(app, width=20)
     amt.grid(row=3, column=2)
     amt.insert(0, x)
     amt.configure(state=DISABLED)
-
 
 def new_win():
     top = Toplevel()
@@ -128,7 +174,7 @@ def fruittotalbar():
         ls_pd.append(prod)
         ls_sale.append(sale)
     df = pd.DataFrame(list(zip(ls_pd, ls_sale)), columns=['Product', 'Sale'])
-    df = df.groupby('Product').sum()
+    df = df.groupby('Product').sum().sort_values('Sale', ascending=False)
     plt.title('Total Revenue by Product')
     g = sns.barplot(data=df, x=df.index, y='Sale', errorbar=None)
     plt.show()
@@ -173,7 +219,7 @@ def fruitmonthline():
 
 
 ######################################
-fields = ['tranid', 'day', 'month', 'year', 'hour', 'product']
+fields = ['_id', 'day', 'month', 'year', 'hour', 'product']
 fruits = ['Apple', 'Banana', 'Coconut', 'Mango', 'Orange']
 day = list(range(1, 32))
 month = list(range(1, 13))
@@ -197,10 +243,10 @@ drop = OptionMenu(app, create_pd, *fruits)
 drop.config(width=14)
 drop.grid(row=1, column=2)
 
-label = Label(app, text='Quality')
+label = Label(app, text='Unit')
 label.grid(row=2, column=1)
-create_qty = Entry(app, width=20)
-create_qty.grid(row=2, column=2)
+create_unit = Entry(app, width=20)
+create_unit.grid(row=2, column=2)
 
 label = Label(app, text='Amount')
 label.grid(row=3, column=1)
@@ -262,18 +308,24 @@ drop = OptionMenu(app, update_pd, *fruits)
 drop.config(width=14)
 drop.grid(row=14, column=2)
 
+label = Label(app, text='Unit')
+label.grid(row=15, column=1)
+
+update_unit = Entry(app, width=20)
+update_unit.grid(row=15, column=2)
+
 label = Label(app, text='')
-label.grid(row=16, column=1)
+label.grid(row=17, column=1)
 
 # delete
 label = Label(app, text='Delete')
-label.grid(row=17, column=1)
-
-label = Label(app, text='ID')
 label.grid(row=18, column=1)
 
+label = Label(app, text='ID')
+label.grid(row=19, column=1)
+
 delete_id = Entry(app, width=20)
-delete_id.grid(row=18, column=2)
+delete_id.grid(row=19, column=2)
 
 #### Button ####
 
@@ -293,21 +345,21 @@ btn.grid(row=9, column=2)
 
 # Update
 btn = Button(app, text='Update', command=update)
-btn.grid(row=15, column=1)
+btn.grid(row=16, column=1)
 
 # Delete
 btn = Button(app, text='Delete', command=delete)
-btn.grid(row=19, column=1)
+btn.grid(row=20, column=1)
 
 btn = Button(app, text='Delete All', command=delete_all)
-btn.grid(row=19, column=2)
+btn.grid(row=20, column=2)
 
 # Plot
 label = Label(app, text='')
-label.grid(row=20, column=1)
+label.grid(row=21, column=1)
 
 btn = Button(app, text='Plot', command=new_win)
-btn.grid(row=21, column=1)
+btn.grid(row=22, column=1)
 
 
 app.mainloop()
