@@ -13,5 +13,5 @@
 
 ### Chart
 ![image](https://user-images.githubusercontent.com/77285026/203700738-abb6522c-3a24-48b7-bb54-5e615c7d19c9.png)
-![image](https://user-images.githubusercontent.com/77285026/203673316-e481e48b-57b9-4a30-a162-3185ea932ee9.png)
-![image](https://user-images.githubusercontent.com/77285026/203673383-4c194416-4e87-46ea-b8fc-b463f87f17ce.png)
+![image](https://user-images.githubusercontent.com/77285026/203701257-e39abc04-f5fe-406b-943b-f84129628672.png)
+![image](https://user-images.githubusercontent.com/77285026/203700873-bd93a8bd-99a4-4845-8f24-d650e4c8135d.png)
