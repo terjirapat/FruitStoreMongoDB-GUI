@@ -103,7 +103,7 @@ def cal():
 
 def new_win():
     top = Toplevel()
-    top.title("toplevel")
+    top.title("Plot")
     top.geometry("200x100")
 
     label = Label(top, text='Click the button to display the graph')
