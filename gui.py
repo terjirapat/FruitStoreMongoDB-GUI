@@ -196,6 +196,7 @@ def fruithourline():
     df = df.groupby(['Product', 'Hour']).sum().reset_index()
     plt.title('Hourly Sales Trend')
     g = sns.lineplot(df, x='Hour', y='Sale', hue='Product')
+    plt.legend(loc='upper right')
     plt.show()
 
 
@@ -215,6 +216,7 @@ def fruitmonthline():
     df = df.groupby(['Product', 'Month']).sum().reset_index()
     plt.title('Monthly Sales Trend')
     g = sns.lineplot(df, x='Month', y='Sale', hue='Product')
+    plt.legend(loc='upper right')
     plt.show()
 
 
