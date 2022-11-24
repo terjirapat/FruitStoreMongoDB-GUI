@@ -1,7 +1,12 @@
-# MongoDB_GUI
+# Fruit Store Database MongoDB GUI 
+- This GUI contain CRUD operation (Create, Retrive, Update, Delete) connected with MongoDB Database
+- Create : Fill in the product name and unit sale then click the save button. The program will calculate the sale amount and current date time and then create new document input into the MongoDB database.
+- Retrive
+- Update
+- Delete
 
 ## Main Window
-![image](https://user-images.githubusercontent.com/77285026/203672241-00cedfd3-0cfc-4770-9c65-06fd94ab6202.png)
+![image](https://user-images.githubusercontent.com/77285026/203693554-706b40d0-bbb0-4939-b22e-1446f44b3633.png)
 
 ## Plot Window
 ![image](https://user-images.githubusercontent.com/77285026/203672397-a1283d5f-29c0-4796-8e38-9ec368379881.png)
